@@ -14,7 +14,7 @@ class bcolors:
 
 class Test(object):
 
-    def __init__(self, width=50, apostrophes=False):
+    def __init__(self, width=80, apostrophes=False):
         self.kb = Keyboard()
         self.lib = Library()
 
@@ -68,3 +68,5 @@ class Test(object):
             self.advance(self.kb.next())
             self.display()
             # time.sleep(1.0/cps)
+
+        print
