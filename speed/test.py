@@ -1,16 +1,9 @@
 import sys
 import time
+from token import Token
 from stream import Keyboard, Library
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
 
 class Test(object):
 
@@ -21,35 +14,40 @@ class Test(object):
         self.width = width
         self.typePos = self.width/2
 
-        self.apostrophes = apostrophes
+        self.useApostrophes = apostrophes
 
-        self.buffer = [' ']*(self.typePos)
+        self.buffer = [Token(' ') for i in range(self.typePos)]
         self.fill()
 
     def fill(self):
-        while len(self.buffer) < self.width:
+
+        while len(self.buffer) - self.typePos < self.width/2:
             n = self.lib.next()
 
-            if n[-2] == "'" and not self.apostrophes:
+            if n[-2] == "'" and not self.useApostrophes:
                 n = n[:-2]
 
-            self.buffer.extend(n)
-            self.buffer.append(' ')
+            for s in list(n):
+                self.buffer.append(Token(s))
+            self.buffer.append(Token(' '))
 
     def advance(self, char):
         if char == self.buffer[self.typePos]:
-            self.buffer[self.typePos] = bcolors.OKBLUE + self.buffer[self.typePos] + bcolors.ENDC
+            self.buffer[self.typePos].succeed()
         else:
-            self.buffer[self.typePos] = bcolors.FAIL + self.buffer[self.typePos] + bcolors.ENDC
+            self.buffer[self.typePos].fail()
 
-        self.buffer = self.buffer[1:]
+        # self.buffer = self.buffer[1:]
+        self.typePos += 1
+
         self.fill()
 
     def string(self):
-        if len(self.buffer) < self.width:
+        if len(self.buffer) - self.typePos < self.width/2:
             self.fill()
 
-        return ''.join(self.buffer[:self.width])
+        tokens = self.buffer[self.typePos - self.width/2:self.typePos+self.width/2]
+        return ''.join([str(t) for t in tokens])
 
     def display(self):
         s = '\r' + self.string()
