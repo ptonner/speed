@@ -3,7 +3,7 @@ import time
 from token import Token
 from stream import Keyboard, Library
 
-
+KEYS = {'backspace': '\x7f'}
 
 class Test(object):
 
@@ -16,7 +16,7 @@ class Test(object):
 
         self.useApostrophes = apostrophes
 
-        self.buffer = [Token(' ') for i in range(self.typePos)]
+        self.buffer = [Token(' ', space=True) for i in range(self.typePos)]
         self.fill()
 
     def fill(self):
@@ -29,16 +29,25 @@ class Test(object):
 
             for s in list(n):
                 self.buffer.append(Token(s))
-            self.buffer.append(Token(' '))
+            self.buffer.append(Token(' ', space=True))
 
     def advance(self, char):
-        if char == self.buffer[self.typePos]:
-            self.buffer[self.typePos].succeed()
-        else:
-            self.buffer[self.typePos].fail()
 
-        # self.buffer = self.buffer[1:]
-        self.typePos += 1
+        if char == KEYS['backspace']:
+            self.typePos -= 1
+            self.buffer[self.typePos].reset()
+        else:
+            if char == self.buffer[self.typePos]:
+                self.buffer[self.typePos].succeed()
+            elif self.buffer[self.typePos].space and char == self.buffer[self.typePos+1]:
+                self.buffer[self.typePos].succeed()
+                self.typePos += 1
+                self.buffer[self.typePos].succeed()
+            else:
+                self.buffer[self.typePos].fail()
+
+            # self.buffer = self.buffer[1:]
+            self.typePos += 1
 
         self.fill()
 
@@ -59,12 +68,8 @@ class Test(object):
         print ' '*(self.typePos) + '~'
         self.display()
 
-        cpm = 240.0
-        cps = cpm/60.0
-
         for i in range(length):
             self.advance(self.kb.next())
             self.display()
-            # time.sleep(1.0/cps)
 
         print

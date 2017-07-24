@@ -11,10 +11,11 @@ class bcolors:
 
 class Token(object):
 
-    def __init__(self, toke):
+    def __init__(self, toke, space=False):
 
         self._token = toke
         self.state = None
+        self.space = space
 
     def __repr__(self):
         if self.state is None:
@@ -30,6 +31,9 @@ class Token(object):
 
     def fail(self):
         self.state = False
+
+    def reset(self,):
+        self.state = None
 
     # def toggle(self):
     #
